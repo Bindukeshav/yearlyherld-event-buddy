@@ -57,7 +57,7 @@ export async function parseFile(file: File): Promise<EventItem[]> {
     const event: EventItem = {
       id: crypto.randomUUID(),
       name: String(name).trim(),
-      date: String(date).trim(),
+      date: formatDate(date),
       time: String(time).trim(),
       type: String(type).trim(),
       emailDraft: "",
