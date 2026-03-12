@@ -4,16 +4,20 @@ import { generateEmailDraft } from "./email-generator";
 import { format, isValid } from "date-fns";
 
 function formatDate(raw: string | number): string {
-  // Excel serial number
-  if (typeof raw === "number") {
+  const val = typeof raw === "string" ? raw.trim() : raw;
+  
+  // Excel serial number (number or numeric string like "46307")
+  const num = typeof val === "number" ? val : Number(val);
+  if (!isNaN(num) && num > 1000 && num < 200000) {
     const excelEpoch = new Date(1899, 11, 30);
-    const parsed = new Date(excelEpoch.getTime() + raw * 86400000);
-    if (isValid(parsed)) return format(parsed, "MMM dd yyyy");
+    const parsed = new Date(excelEpoch.getTime() + num * 86400000);
+    if (isValid(parsed)) return format(parsed, "MMM dd, yyyy");
   }
+
   // Try parsing string dates
-  const parsed = new Date(String(raw));
-  if (isValid(parsed) && !isNaN(parsed.getTime())) return format(parsed, "MMM dd yyyy");
-  return String(raw).trim();
+  const parsed = new Date(String(val));
+  if (isValid(parsed) && !isNaN(parsed.getTime())) return format(parsed, "MMM dd, yyyy");
+  return String(val);
 }
 
 function normalizeHeader(header: string): string {
