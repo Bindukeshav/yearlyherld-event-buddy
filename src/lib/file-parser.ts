@@ -1,6 +1,20 @@
 import * as XLSX from "xlsx";
 import { EventItem } from "@/types/event";
 import { generateEmailDraft } from "./email-generator";
+import { format, isValid } from "date-fns";
+
+function formatDate(raw: string | number): string {
+  // Excel serial number
+  if (typeof raw === "number") {
+    const excelEpoch = new Date(1899, 11, 30);
+    const parsed = new Date(excelEpoch.getTime() + raw * 86400000);
+    if (isValid(parsed)) return format(parsed, "MMM dd yyyy");
+  }
+  // Try parsing string dates
+  const parsed = new Date(String(raw));
+  if (isValid(parsed) && !isNaN(parsed.getTime())) return format(parsed, "MMM dd yyyy");
+  return String(raw).trim();
+}
 
 function normalizeHeader(header: string): string {
   return header.toLowerCase().replace(/[\s_-]+/g, "").trim();
@@ -43,7 +57,7 @@ export async function parseFile(file: File): Promise<EventItem[]> {
     const event: EventItem = {
       id: crypto.randomUUID(),
       name: String(name).trim(),
-      date: String(date).trim(),
+      date: formatDate(date),
       time: String(time).trim(),
       type: String(type).trim(),
       emailDraft: "",
